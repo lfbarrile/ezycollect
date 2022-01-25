@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-acquirer-example-ENVIRONMENT
+  namespace: nginx-acquirer-example-ENVIRONMENT
+spec:
+  selector:
+    matchLabels:
+      app: nginx-acquirer-example-ENVIRONMENT
+  replicas: 2 # tells deployment to run 2 pods matching the template
+  template:
+    metadata:
+      labels:
+        app: nginx-acquirer-example-ENVIRONMENT
+    spec:
+      containers:
+      - name: nginx-acquirer-example-ENVIRONMENT
+        image: dockerbogo/docker-nginx-hello-world
+        ports:
+        - containerPort: 5555
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-acquirer-example-ENVIRONMENT
+  namespace: nginx-acquirer-example-ENVIRONMENT
+spec:
+  ports:
+  - port: 5555
+    protocol: TCP
+    targetPort: 5555
+  selector:
+    app: nginx-acquirer-example-ENVIRONMENT
