@@ -12,7 +12,7 @@ pipeline {
 
     environment {
         ECR_URL = 'https://758526784474.dkr.ecr.us-east-1.amazonaws.com/'
-        S3_BUCKET_TEMPLATE = "cdt-devops-tools-lambda-functions-template"
+        S3_BUCKET_TEMPLATE = "nginx-example-template"
         PATH_DEPLOY = "nginx-example"
         ARCHITECTURE = "Serverless"
 

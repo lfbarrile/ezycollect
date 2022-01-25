@@ -2,5 +2,9 @@
     {
         "ParameterKey": "Env",
         "ParameterValue": "dev"
-    } 
+    },
+    {
+        "ParameterKey": "BucketName",
+        "ParameterValue": "ezycollect.dev"
+      } 
 ]

@@ -1,0 +1,66 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Ezycollect cloud resources
+
+Parameters:
+  
+  Versao:
+    Type: String
+  
+  Env:
+    Type: String
+
+  BucketName:
+    Type: String
+
+Resources:
+  EzyCollectBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BucketName
+      AccessControl: Private
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: 'AES256'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: True
+        BlockPublicPolicy: True
+        IgnorePublicAcls: True
+        RestrictPublicBuckets: True
+      Tags:
+          -
+            Key: env
+            Value: !Ref Env
+          -
+            Key: service
+            Value: ezycollect-challenge
+        
+          -
+            Key: resource
+            Value: s3  
+Outputs:
+
+  EzyCollectBucket:
+    Description: Ezycollect S3 Bucket
+    Value: !Ref EzyCollectBucket
+    Export:
+      Name: EzyCollectBucket
+  
+  EzyCollectSQS:
+    Type: AWS::SQS::Queue
+    Properties:
+      VisibilityTimeout: 120
+      QueueName: EzyCollectSQS
+      Tags:
+        -
+          Key: env
+          Value: !Ref Env
+        -
+          Key: service
+          Value: ezycollect-challenge
+        
+        -
+          Key: resource
+          Value: sqs
+
