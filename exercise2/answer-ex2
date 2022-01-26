@@ -1,0 +1,8 @@
+Monitor S3 Buckets- The most common tool to analyze S3 Buckets is CloudTrail together with Amazon Cloudwatch.
+Cloudtrail provides a record of actions taken by a user,role or an AWS Service, for example you can determine the IP origin from which the request was made.
+
+With Cloudwatch is possible to create Alarms. If the metric exceeds of this specific threshold, a notification is sent to an Amazon SNS topic.
+
+On the SQS scenario using too Cloudwatch integrated on the Queue is possible to view and analyze metrics for Amazon SQS queues.
+
+
