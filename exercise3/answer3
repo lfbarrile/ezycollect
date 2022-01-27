@@ -1,0 +1,146 @@
+Tools, commands and methods to analyse problem on application deployed on Kubernetes Cluster.
+
+Apparently in the scenario on the exercise 3, the problem is on the network layer on the expose step in the application.
+
+Steps
+1- Verify the status of pod using the below commands
+kubectl describe pod -n namespace pod-id
+
+Example of output
+kubectl describe pod -n bricks-dev               bricks-api-k8s-dev-7d9d9d67c6-mvxp8
+Name:         bricks-api-k8s-dev-7d9d9d67c6-mvxp8
+Namespace:    bricks-dev
+Priority:     0
+Node:         ip-10-90-9-141.ec2.internal/10.90.9.141
+Start Time:   Mon, 24 Jan 2022 11:55:30 -0300
+Labels:       app=bricks-api-k8s-dev
+              environment=dev
+              pod-template-hash=7d9d9d67c6
+              version=11.0.51
+Annotations:  ad.datadoghq.com/tags: {"env": "dev","squad": "oreas"}
+              kubernetes.io/change-cause: COMMIT_MESSAGE
+              kubernetes.io/psp: eks.privileged
+Status:       Running
+IP:           10.90.9.220
+IPs:
+  IP:           10.90.9.220
+Controlled By:  ReplicaSet/bricks-api-k8s-dev-7d9d9d67c6
+Containers:
+  bricks-api-k8s-dev:
+    Container ID:   docker://5358ab9aa89bdf85be49473ee4e54ce68980264f56a50596f461d04b9af853df
+    Image:          758526784474.dkr.ecr.us-east-1.amazonaws.com/bricks-api-k8s:11.0.51
+    Image ID:       docker-pullable://758526784474.dkr.ecr.us-east-1.amazonaws.com/bricks-api-k8s@sha256:0ee80649f1e2c8052f154c438e24eae3664e04b0c6f94d1c5fde6a14a51d6ea7
+    Port:           3000/TCP
+    Host Port:      0/TCP
+    State:          Running
+      Started:      Mon, 24 Jan 2022 11:55:35 -0300
+    Ready:          True
+    Restart Count:  0
+    Limits:
+      cpu:     256m
+      memory:  256Mi
+    Requests:
+      cpu:      256m
+      memory:   256Mi
+    Liveness:   http-get http://:http/health delay=120s timeout=10s period=30s #success=1 #failure=2
+    Readiness:  http-get http://:http/health delay=120s timeout=10s period=30s #success=1 #failure=2
+    Environment Variables from:
+      bricks-api-k8s-dev  ConfigMap  Optional: false
+    Environment:
+      DD_AGENT_HOST:                 (v1:status.hostIP)
+      AWS_DEFAULT_REGION:           us-east-1
+      AWS_REGION:                   us-east-1
+      AWS_ROLE_ARN:                 arn:aws:iam::994357011367:role/OIDCRoleDjedLedgerGatewayApiRole
+      AWS_WEB_IDENTITY_TOKEN_FILE:  /var/run/secrets/eks.amazonaws.com/serviceaccount/token
+    Mounts:
+      /var/run/secrets/eks.amazonaws.com/serviceaccount from aws-iam-token (ro)
+      /var/run/secrets/kubernetes.io/serviceaccount from bricks-api-k8s-token-6jsjx (ro)
+Conditions:
+  Type              Status
+  Initialized       True
+  Ready             True
+  ContainersReady   True
+  PodScheduled      True
+Volumes:
+  aws-iam-token:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  86400
+  bricks-api-k8s-token-6jsjx:
+    Type:        Secret (a volume populated by a Secret)
+    SecretName:  bricks-api-k8s-token-6jsjx
+    Optional:    false
+QoS Class:       Guaranteed
+Node-Selectors:  <none>
+Tolerations:     node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                 node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:          <none>
+
+____________________________________________________________________________
+Other command is analyze the execution log of POD
+
+kubectl logs -f -n namespace podid
+
+Output command
+> console-transactions-iris@1.0.0 start
+> nodemon --max-http-header-size 80000 --ext js,graphql
+
+[nodemon] 2.0.15
+[nodemon] to restart at any time, enter `rs`
+[nodemon] watching path(s): *.*
+[nodemon] watching extensions: js,graphql
+[nodemon] starting `node --max-http-header-size 80000 handler.js`
+Enabling inline tracing for this federated service. To disable, use ApolloServerPluginInlineTraceDisabled.
+🚀 Server ready at http://localhost:4009/
+
+____________________________________________________________________________
+Analyze the status of ingress can be a good solution to discover the problem exposing the pod.
+
+kubectl describe ingress -n namespace ingressname       
+
+Output Command
+Name:             auzituck-dev
+Namespace:        auzituck-dev
+Address:          k8s-auzituck-auzituck-2057489dc6-1059779489.us-east-1.elb.amazonaws.com
+Default backend:  default-http-backend:80 (<error: endpoints "default-http-backend" not found>)
+Rules:
+  Host                             Path  Backends
+  ----                             ----  --------
+  auzituck-grown.dev.caradhras.io
+                                   /auzituck-grown-orchestration/v1/*   auzituck-grown-orchestration-dev:http (10.90.9.101:3000)
+Annotations:                       alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:994357011367:certificate/cc18836a-df58-4ac5-be27-51427a82024d
+                                   alb.ingress.kubernetes.io/healthcheck-interval-seconds: 60
+                                   alb.ingress.kubernetes.io/healthcheck-path: /health
+                                   alb.ingress.kubernetes.io/listen-ports: [{"HTTPS": 443}]
+                                   alb.ingress.kubernetes.io/scheme: internet-facing
+                                   alb.ingress.kubernetes.io/tags: Environment=dev,Service=auzituck
+                                   alb.ingress.kubernetes.io/target-type: instance
+                                   dns_zone: public
+                                   external-dns.alpha.kubernetes.io/hostname: auzituck-grown.dev.caradhras.io
+                                   field.cattle.io/publicEndpoints:
+                                     [{"addresses":[""],"port":80,"protocol":"HTTP","serviceName":"auzituck-dev:auzituck-grown-orchestration-dev","ingressName":"auzituck-dev:a...
+                                   kubernetes.io/ingress.class: alb
+Events:                            <none>
+
+If the ingress have a problem the Events can show the error.
+_______________________________________________________________________________________________
+red-dev               gensock-api-dev              <none>   pending
+
+Sometimes the status of ingress is PENDING is this status normally means a problem on ingress to create a resource on cloud provider.
+
+________________________________________________________________________________________________
+
+The dns-public helm on the kube-system of Kubernetes have the task to correlate a service of DNS on Cloud Provider, for this reason is possible to view some errors on the logs of this pod
+
+kubectl logs -f -n kube-system              external-dns-public-5875c6b9f9-4mqxk
+
+Output command
+time="2021-12-15T09:17:12Z" level=info msg="config: {Master: KubeConfig: RequestTimeout:30s IstioIngressGatewayServices:[] ContourLoadBalancerService:heptio-contour/contour SkipperRouteGroupVersion:zalando.org/v1 Sources:[service ingress] Namespace: AnnotationFilter:dns_zone=public FQDNTemplate: CombineFQDNAndAnnotation:false IgnoreHostnameAnnotation:false Compatibility: PublishInternal:true PublishHostIP:false AlwaysPublishNotReadyAddresses:false ConnectorSourceServer:localhost:8080 Provider:aws GoogleProject: GoogleBatchChangeSize:1000 GoogleBatchChangeInterval:1s DomainFilter:[hml.caradhras.io.] ExcludeDomains:[] ZoneIDFilter:[] AlibabaCloudConfigFile:/etc/kubernetes/alibaba-cloud.json AlibabaCloudZoneType: AWSZoneType: AWSZoneTagFilter:[] AWSAssumeRole: AWSBatchChangeSize:1000 AWSBatchChangeInterval:1s AWSEvaluateTargetHealth:true AWSAPIRetries:3 AWSPreferCNAME:false AzureConfigFile:/etc/kubernetes/azure.json AzureResourceGroup: AzureSubscriptionID: AzureUserAssignedIdentityClientID: CloudflareProxied:false CloudflareZonesPerPage:50 CoreDNSPrefix:/skydns/ RcodezeroTXTEncrypt:false AkamaiServiceConsumerDomain: AkamaiClientToken: AkamaiClientSecret: AkamaiAccessToken: InfobloxGridHost: InfobloxWapiPort:443 InfobloxWapiUsername:admin InfobloxWapiPassword: InfobloxWapiVersion:2.3.1 InfobloxSSLVerify:true InfobloxView: InfobloxMaxResults:0 DynCustomerName: DynUsername: DynPassword: DynMinTTLSeconds:0 OCIConfigFile:/etc/kubernetes/oci.yaml InMemoryZones:[] OVHEndpoint:ovh-eu PDNSServer:http://localhost:8081 PDNSAPIKey: PDNSTLSEnabled:false TLSCA: TLSClientCert: TLSClientCertKey: Policy:upsert-only Registry:txt TXTOwnerID:Z1KOLYQNEZJJ6H TXTPrefix:13591833-F9CE-407C-8519-35A947DB1D87- TXTSuffix: Interval:1m0s Once:false DryRun:false UpdateEvents:false LogFormat:text MetricsAddress::7979 LogLevel:info TXTCacheInterval:0s ExoscaleEndpoint:https://api.exoscale.ch/dns ExoscaleAPIKey: ExoscaleAPISecret: CRDSourceAPIVersion:externaldns.k8s.io/v1alpha1 CRDSourceKind:DNSEndpoint ServiceTypeFilter:[] CFAPIEndpoint: CFUsername: CFPassword: RFC2136Host: RFC2136Port:0 RFC2136Zone: RFC2136Insecure:false RFC2136TSIGKeyName: RFC2136TSIGSecret: RFC2136TSIGSecretAlg: RFC2136TAXFR:false RFC2136MinTTL:0s NS1Endpoint: NS1IgnoreSSL:false TransIPAccountName: TransIPPrivateKeyFile:}"
+time="2021-12-15T09:17:12Z" level=info msg="Instantiating new Kubernetes client"
+
+___________________________________________________________________________________
+On the AWS Console is possible to verify the status of ALB/NLB and maybe show some error
+
+Image 1 attached.
+
+
+
